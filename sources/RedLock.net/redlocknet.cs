@@ -33,6 +33,12 @@ public class RedLockNetLock : ILock
         var rl = Interlocked.Exchange(ref _redLock, null);
         rl?.Dispose();
     }
+    
+    public Task DisposeAsync()
+    {
+		Dispose();
+		return Task.CompletedTask;
+    }
 }
 
 public class RedLockNetLockFactory : ILockFactory

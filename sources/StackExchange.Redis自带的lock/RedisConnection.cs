@@ -49,4 +49,38 @@ public class RedisConnection
             _connectionLock.Release();
         }
     }
+    
+    public ConnectionMultiplexer TryOpen()
+    {
+        _connectionLock.Wait();
+        try
+        {
+            if (_connection == null || (!_connection.IsConnecting && !_connection.IsConnected))
+            {
+                _connection = ConnectionMultiplexer.Connect(_options);
+            }
+            return _connection;              
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
+    }
+
+    public void Close(bool allowCommandsToComplete = true)
+    {
+        _connectionLock.Wait();
+        try
+        {
+            if (_connection?.IsConnected == true)
+            {
+                _connection.Close(allowCommandsToComplete);
+                _connection = null;
+            }
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
+    }
 }
